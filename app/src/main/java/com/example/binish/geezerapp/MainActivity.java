@@ -81,14 +81,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         slide = AnimationUtils.loadAnimation(this,R.anim.slide);
 
         dataViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()).create(GetData.class);
-        dataViewModel.getParameters().observe(this, new Observer<Parameters>() {
-            @Override
-            public void onChanged(@Nullable Parameters parameters) {
-                if (parameters.getStreets() != null)
-                    populateSearch(parameters);
-                MainActivity.this.parameters = parameters;
-            }
-        });
+        observingSearchParameters();
+        
         searchDropdown.setOnClickListener(this);
         searchBox.setOnEditorActionListener(this);
         orderByCardView.setOnClickListener(this);
@@ -278,10 +272,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    private void observingSearchParameters(){
+        dataViewModel.getParameters().observe(this, new Observer<Parameters>() {
+            @Override
+            public void onChanged(@Nullable Parameters parameters) {
+                if (parameters.getStreets() != null)
+                    populateSearch(parameters);
+                MainActivity.this.parameters = parameters;
+            }
+        });
+    }
+
     private void populateSearch(Parameters parameters) {
         //Streets
         addValueToSpinner(R.id.streetSpinner, parameters.getStreets());
-
         //Price Range
         addValueToPriceRange(R.id.priceRangeSpinner, parameters.getPrice_ranges());
         //Number of Bedrooms
@@ -292,11 +296,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         addValueToSpinner(R.id.typeSpinner, parameters.getTypes());
         //Furnishing
         addValueToSpinner(R.id.furnishingSpinner, parameters.getFurnishing());
-        //Facilities
-
         //Transport
         addValueToSpinner(R.id.transportSpinner, parameters.getTransport());
-        //Popular Keywords
+
 
     }
 
