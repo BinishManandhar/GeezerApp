@@ -1,20 +1,26 @@
 package com.example.binish.geezerapp;
 
+import android.animation.ObjectAnimator;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -47,7 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String TAG = "ParameterRetrofit";
     GetData dataViewModel;
     RecyclerView recyclerView;
-    LinearLayout advanceSearchLayout;
+    LinearLayout advanceSearchLayout,searchLinearLayout;
+    ConstraintLayout mainContraintLayout;
     ImageView searchDropdown;
     CardView searchCardView;
     EditText searchBox;
@@ -56,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Spinner streetSpinner, priceRangeSpinner, bedroomSpinner, bathroomSpinner, typeSpinner, furnishingSpinner;
     Spinner transportSpinner;
     Button facilityButton;
+    Animation slide;
 
     Parameters parameters;
     ArrayList<String> facilityList = new ArrayList<>();
@@ -70,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         initializeViews();
         parameters = new Parameters();
-
+        slide = AnimationUtils.loadAnimation(this,R.anim.slide);
 
         dataViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()).create(GetData.class);
         dataViewModel.getParameters().observe(this, new Observer<Parameters>() {
@@ -85,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         searchBox.setOnEditorActionListener(this);
         orderByCardView.setOnClickListener(this);
         facilityButton.setOnClickListener(this);
+
     }
 
     @Override
@@ -92,9 +101,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.searchDropdown:
                 if (advanceSearchLayout.getVisibility() == View.VISIBLE) {
+                    TransitionManager.beginDelayedTransition(mainContraintLayout,new AutoTransition().setDuration(500));
                     advanceSearchLayout.setVisibility(View.GONE);
                     searchDropdown.setImageResource(R.drawable.ic_arrow_drop_down_black_24dp);
                 } else {
+                    TransitionManager.beginDelayedTransition(mainContraintLayout,new AutoTransition().setDuration(500));
                     advanceSearchLayout.setVisibility(View.VISIBLE);
                     searchDropdown.setImageResource(R.drawable.ic_arrow_drop_up_black_24dp);
                 }
@@ -316,7 +327,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initializeViews() {
         searchCardView = findViewById(R.id.searchCardView);
+        mainContraintLayout = findViewById(R.id.mainContraintLayout);
         advanceSearchLayout = findViewById(R.id.advanceSearchLayout);
+        searchLinearLayout = findViewById(R.id.searchLinearLayout);
         searchDropdown = findViewById(R.id.searchDropdown);
         searchBox = findViewById(R.id.searchBox);
         orderByCardView = findViewById(R.id.orderByCardView);
@@ -331,4 +344,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         furnishingSpinner = findViewById(R.id.furnishingSpinner);
         transportSpinner = findViewById(R.id.transportSpinner);
     }
+
 }

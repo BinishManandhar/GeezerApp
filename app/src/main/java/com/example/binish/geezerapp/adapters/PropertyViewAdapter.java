@@ -20,7 +20,8 @@ import java.util.List;
 public class PropertyViewAdapter extends RecyclerView.Adapter<ViewHolder> {
     Context context;
     List<Property> properties;
-    public PropertyViewAdapter(Context context, List<Property> properties){
+
+    public PropertyViewAdapter(Context context, List<Property> properties) {
         this.context = context;
         this.properties = properties;
     }
@@ -28,7 +29,7 @@ public class PropertyViewAdapter extends RecyclerView.Adapter<ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.design_properties,parent,false));
+        return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.design_properties, parent, false));
     }
 
     @Override
@@ -37,17 +38,18 @@ public class PropertyViewAdapter extends RecyclerView.Adapter<ViewHolder> {
         holder.name.setText(property.getName());
         holder.full_address.setText(property.getFull_address());
         holder.type.setText(property.getType());
-        holder.price.setText("$"+String.valueOf(property.getMonthly_rental())+" / month");
-        holder.bedrooms.setText(String.valueOf(property.getNum_bedrooms())+" bedrooms");
-        holder.bathrooms.setText(String.valueOf(property.getNum_bathrooms())+" bathrooms");
-        holder.sqft.setText(String.valueOf(property.getSize_sqft())+" sq. ft.");
-        holder.months.setText(property.getLease_terms().get(0));
+        holder.price.setText("$" + String.valueOf(property.getMonthly_rental()) + " / month");
+        holder.bedrooms.setText(String.valueOf(property.getNum_bedrooms()) + " bedrooms");
+        holder.bathrooms.setText(String.valueOf(property.getNum_bathrooms()) + " bathrooms");
+        holder.sqft.setText(String.valueOf(property.getSize_sqft()) + " sq. ft.");
+        if (property.getLease_terms().size() > 0)
+            holder.months.setText(property.getLease_terms().get(0));
         holder.furnished.setText(property.getFurnishing());
-        holder.closestMRT.setText("Parking: "+property.getParking());
-        holder.year_built.setText("Year Built: "+String.valueOf(property.getYear_built()));
-        holder.facilities.setText("Special: "+property.getSpecial());
+        holder.closestMRT.setText("Parking: " + property.getParking());
+        holder.year_built.setText("Year Built: " + String.valueOf(property.getYear_built()));
+        holder.facilities.setText("Special: " + property.getSpecial());
 
-        if(property.getWishlisted())
+        if (property.getWishlisted())
             holder.wishList.setImageResource(R.drawable.ic_shopping_cart_dark_24dp);
         Glide.with(context)
                 .load(property.getImages().get(0))
@@ -61,13 +63,14 @@ public class PropertyViewAdapter extends RecyclerView.Adapter<ViewHolder> {
     }
 }
 
-class ViewHolder extends RecyclerView.ViewHolder{
-    TextView name,full_address,type,price;
+class ViewHolder extends RecyclerView.ViewHolder {
+    TextView name, full_address, type, price;
     ImageView property_image, wishList;
-    TextView bedrooms,bathrooms,sqft,months;
-    TextView furnished,closestMRT,facilities,year_built;
+    TextView bedrooms, bathrooms, sqft, months;
+    TextView furnished, closestMRT, facilities, year_built;
     LinearLayout detailsLayout;
     CardView propertyCardView;
+
     public ViewHolder(@NonNull View itemView) {
         super(itemView);
         name = itemView.findViewById(R.id.name);

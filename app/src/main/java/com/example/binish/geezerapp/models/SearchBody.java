@@ -8,7 +8,7 @@ public class SearchBody {
     @SerializedName("sort_by")
     String sort_by="price_asc";
     @SerializedName("result_size")
-    String result_size="5";
+    String result_size="10";
     @SerializedName("skip")
     int skip;
 
