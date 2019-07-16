@@ -66,12 +66,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dataViewModel.getParameters().observe(this, new Observer<Parameters>() {
             @Override
             public void onChanged(@Nullable Parameters parameters) {
-                try {
-                    if (parameters.getStreets() != null)
-                        populateSearch(parameters);
-                } catch (Exception e) {
-                    Log.i(TAG, "onChanged: " + e);
-                }
+                if (parameters.getStreets() != null)
+                    populateSearch(parameters);
+
             }
         });
         searchDropdown.setOnClickListener(this);
@@ -180,18 +177,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void addValueToSpinner(int spinnerID, List<String> items) {
         Spinner streetSpinner = findViewById(spinnerID);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
-        streetSpinner.setAdapter(adapter);
+        try {
+            streetSpinner.setAdapter(adapter);
+        } catch (NullPointerException e) {
+            Log.i(TAG, "Null Pointer: " + e);
+        }
     }
 
     private void addValueToPriceRange(int spinnerID, List<PriceRange> prices) {
         ArrayList<String> items = new ArrayList<>();
-        for (PriceRange price : prices
-                ) {
-            items.add(price.getLow() + " - " + price.getHigh());
+        try {
+            for (PriceRange price : prices
+                    ) {
+                items.add(price.getLow() + " - " + price.getHigh());
+            }
+            Spinner streetSpinner = findViewById(spinnerID);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
+            streetSpinner.setAdapter(adapter);
+        } catch (NullPointerException e) {
+            Log.i(TAG, "Null Pointer: " + e);
         }
-        Spinner streetSpinner = findViewById(spinnerID);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
-        streetSpinner.setAdapter(adapter);
     }
 
 
