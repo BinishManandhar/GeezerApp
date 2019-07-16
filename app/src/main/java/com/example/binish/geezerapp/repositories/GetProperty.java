@@ -34,8 +34,6 @@ public class GetProperty {
             @Override
             public void onResponse(Call<Result> call, Response<Result> response) {
                 liveResult.setValue(response.body());
-                Log.i(TAG, "onResponse: "+response.body().getNum_matched());
-
             }
 
             @Override
