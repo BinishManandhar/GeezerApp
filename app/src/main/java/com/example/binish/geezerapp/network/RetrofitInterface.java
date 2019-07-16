@@ -1,5 +1,6 @@
 package com.example.binish.geezerapp.network;
 
+import com.example.binish.geezerapp.models.AdvanceSearchBody;
 import com.example.binish.geezerapp.models.Parameters;
 import com.example.binish.geezerapp.models.Property;
 import com.example.binish.geezerapp.models.Result;
@@ -16,4 +17,7 @@ public interface RetrofitInterface {
 
     @POST("/search")
     Call<Result> searchProperty(@Body SearchBody searchBody);
+
+    @POST("/search")
+    Call<Result> searchAdvanceProperty(@Body AdvanceSearchBody searchBody);
 }

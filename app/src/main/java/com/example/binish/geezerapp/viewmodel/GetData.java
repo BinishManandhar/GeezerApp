@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
+import com.example.binish.geezerapp.models.AdvanceSearchBody;
 import com.example.binish.geezerapp.models.Parameters;
 import com.example.binish.geezerapp.models.Property;
 import com.example.binish.geezerapp.models.Result;
@@ -33,5 +34,10 @@ public class GetData extends ViewModel {
     }
     public LiveData<Result> getProperty(){
         return result;
+    }
+
+    public void setPropertyAdvance(AdvanceSearchBody advanceSearchBody){
+        GetProperty getProperty = GetProperty.getInstance();
+        result = getProperty.getAdvanceParameters(advanceSearchBody);
     }
 }
