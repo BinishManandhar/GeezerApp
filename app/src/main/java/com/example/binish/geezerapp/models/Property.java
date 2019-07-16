@@ -62,7 +62,7 @@ public class Property {
     @SerializedName("amenities_other")
     ArrayList<String> amenities_other;
     @SerializedName("wishlisted")
-    String wishlisted;
+    boolean wishlisted;
     @SerializedName("media")
     Media medias;
     @SerializedName("photo-large")
@@ -294,11 +294,11 @@ public class Property {
         this.amenities_other = amenities_other;
     }
 
-    public String getWishlisted() {
+    public boolean getWishlisted() {
         return wishlisted;
     }
 
-    public void setWishlisted(String wishlisted) {
+    public void setWishlisted(boolean wishlisted) {
         this.wishlisted = wishlisted;
     }
 

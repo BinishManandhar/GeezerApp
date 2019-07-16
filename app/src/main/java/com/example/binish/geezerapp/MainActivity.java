@@ -1,13 +1,12 @@
 package com.example.binish.geezerapp;
 
-import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.content.DialogInterface;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,7 +15,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -27,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +35,7 @@ import com.example.binish.geezerapp.models.PriceRange;
 import com.example.binish.geezerapp.models.Property;
 import com.example.binish.geezerapp.models.Result;
 import com.example.binish.geezerapp.models.SearchBody;
-import com.example.binish.geezerapp.repositories.GetSearchParameters;
+import com.example.binish.geezerapp.utils.Utils;
 import com.example.binish.geezerapp.viewmodel.GetData;
 
 import java.util.ArrayList;
@@ -56,12 +53,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     EditText searchBox;
     CardView orderByCardView;
     NumberPicker numberPicker;
-Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpinner,furnishingSpinner;
+    Spinner streetSpinner, priceRangeSpinner, bedroomSpinner, bathroomSpinner, typeSpinner, furnishingSpinner;
     Spinner transportSpinner;
     Button facilityButton;
-    
+
     Parameters parameters;
-    ArrayList<String> facilityList;	PropertyViewAdapter propertyViewAdapter;    String order_by = "price_asc";
+    ArrayList<String> facilityList = new ArrayList<>();
+    PropertyViewAdapter propertyViewAdapter;
+    String order_by = "price_asc";
     int defaultOrderValue = 0;
 
     @Override
@@ -71,7 +70,6 @@ Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpin
 
         initializeViews();
         parameters = new Parameters();
-        facilityList = new ArrayList<>();
 
 
         dataViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()).create(GetData.class);
@@ -90,7 +88,7 @@ Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpin
     }
 
     @Override
-    public void onClick(View view) {
+    public void onClick(final View view) {
         switch (view.getId()) {
             case R.id.searchDropdown:
                 if (advanceSearchLayout.getVisibility() == View.VISIBLE) {
@@ -121,7 +119,7 @@ Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpin
                 box.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        switch (list[numberPicker.getValue()]){
+                        switch (list[numberPicker.getValue()]) {
                             case "Price Ascending":
                                 order_by = "price_asc";
                                 defaultOrderValue = 0;
@@ -146,30 +144,34 @@ Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpin
                 box.setView(dialogView);
                 box.show();
                 break;
-                
+
             case R.id.facilityButton:
-                View facilityView = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_facilities,null);
+                View facilityView = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_facilities, null);
                 LinearLayout facilityLayout = facilityView.findViewById(R.id.facilityLayout);
-                int id = checkbox_id;
-                for (final String facility: parameters.getFacilities()
-                     ) {
+                for (final String facility : parameters.getFacilities()
+                        ) {
                     CheckBox checkBox = new CheckBox(MainActivity.this);
-                    checkBox.setId(id);
                     checkBox.setText(facility);
+
+                    if (facilityList.size() != 0)
+                        for (String value : facilityList
+                                ) {
+                            if (value.equals(facility))
+                                checkBox.setChecked(true);
+                        }
 
                     checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
                         public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                             if (b) {
                                 facilityList.add(facility);
-                            }else{
+                            } else {
                                 facilityList.remove(facility);
                             }
                         }
                     });
 
                     facilityLayout.addView(checkBox);
-                    id++;
                 }
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Select Facilities")
@@ -177,6 +179,8 @@ Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpin
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
+                                Button select = (Button) view;
+                                select.setText("Selected");
                                 dialogInterface.dismiss();
                             }
                         })
@@ -195,26 +199,9 @@ Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpin
         if (i == EditorInfo.IME_ACTION_DONE) {
             if (!searchBox.getText().toString().equals("")) {
                 searchWork(true);
-                else {
-                    ArrayList<String> num_bedrooms = new ArrayList<>();
-                    num_bedrooms.add(bedroomSpinner.getSelectedItem().toString());
-                    ArrayList<String> num_bathrooms = new ArrayList<>();
-                    num_bathrooms.add(bathroomSpinner.getSelectedItem().toString());
 
-                    String keyword = searchBox.getText().toString();
-                    AdvanceSearchBody advanceSearchBody = new AdvanceSearchBody();
-                    advanceSearchBody.setLocation(streetSpinner.getSelectedItem().toString());
-                    advanceSearchBody.setPrice_low(0);
-                    advanceSearchBody.setPrice_high(2000);
-                    advanceSearchBody.setNum_bedrooms(num_bedrooms);
-                    advanceSearchBody.setNum_bathrooms(num_bathrooms);
-                    advanceSearchBody.setType(typeSpinner.getSelectedItem().toString());
-                    advanceSearchBody.setFurnishing(furnishingSpinner.getSelectedItem().toString());
-                    advanceSearchBody.setFacilities(facilityList);
-                    advanceSearchBody.setTransport(transportSpinner.getSelectedItem().toString());
-                    dataViewModel.setPropertyAdvance(advanceSearchBody);
-                }
-            }
+            } else
+                Toast.makeText(MainActivity.this, "Search field cannot be empty", Toast.LENGTH_SHORT).show();
             return true;
         }
         return false;
@@ -236,17 +223,48 @@ Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpin
             searchBody.setSkip(0);
             searchBody.setSort_by(order_by);
             dataViewModel.setProperty(searchBody);
-            dataViewModel.getProperty().observe(this, new Observer<Result>() {
-                @Override
-                public void onChanged(@Nullable Result result) {
-                    if(enter)
-                        initRecyclerView(result.getProperties());
-                    else
-                        propertyViewAdapter.notifyDataSetChanged();
-                    orderByCardView.setVisibility(View.VISIBLE);
-                }
-            });
+            observingProperties(enter);
+        } else if (!facilityButton.getText().toString().equals("Select")) {
+            advanceSearchLayout.setVisibility(View.GONE);
+            ArrayList<String> num_bedrooms = new ArrayList<>();
+            num_bedrooms.add(bedroomSpinner.getSelectedItem().toString());
+            ArrayList<String> num_bathrooms = new ArrayList<>();
+            num_bathrooms.add(bathroomSpinner.getSelectedItem().toString());
+            String keyword = searchBox.getText().toString();
+            AdvanceSearchBody advanceSearchBody = new AdvanceSearchBody();
+            advanceSearchBody.setKeyword(keyword);
+            advanceSearchBody.setSkip(0);
+            advanceSearchBody.setSort_by(order_by);
+            advanceSearchBody.setLocation(streetSpinner.getSelectedItem().toString());
+
+            String[] lowHigh = Utils.getLowHighPrice(priceRangeSpinner.getSelectedItem().toString());
+            advanceSearchBody.setPrice_low(Integer.valueOf(lowHigh[0]));
+            advanceSearchBody.setPrice_high(Integer.valueOf(lowHigh[2]));
+
+            advanceSearchBody.setNum_bedrooms(num_bedrooms);
+            advanceSearchBody.setNum_bathrooms(num_bathrooms);
+            advanceSearchBody.setType(typeSpinner.getSelectedItem().toString());
+            advanceSearchBody.setFurnishing(furnishingSpinner.getSelectedItem().toString());
+            advanceSearchBody.setFacilities(facilityList);
+            advanceSearchBody.setTransport(transportSpinner.getSelectedItem().toString());
+            dataViewModel.setPropertyAdvance(advanceSearchBody);
+            observingProperties(enter);
+        } else {
+            Toast.makeText(MainActivity.this, "Please select atleast one facility", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void observingProperties(final Boolean enter) {
+        dataViewModel.getProperty().observe(this, new Observer<Result>() {
+            @Override
+            public void onChanged(@Nullable Result result) {
+                if (enter)
+                    initRecyclerView(result.getProperties());
+                else
+                    propertyViewAdapter.notifyDataSetChanged();
+                orderByCardView.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private void populateSearch(Parameters parameters) {
@@ -264,7 +282,7 @@ Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpin
         //Furnishing
         addValueToSpinner(R.id.furnishingSpinner, parameters.getFurnishing());
         //Facilities
-        
+
         //Transport
         addValueToSpinner(R.id.transportSpinner, parameters.getTransport());
         //Popular Keywords
@@ -296,12 +314,13 @@ Spinner streetSpinner, priceRangeSpinner,bedroomSpinner,bathroomSpinner,typeSpin
         }
     }
 
-    private void initializeViews(){
+    private void initializeViews() {
         searchCardView = findViewById(R.id.searchCardView);
         advanceSearchLayout = findViewById(R.id.advanceSearchLayout);
         searchDropdown = findViewById(R.id.searchDropdown);
         searchBox = findViewById(R.id.searchBox);
         orderByCardView = findViewById(R.id.orderByCardView);
+
         recyclerView = findViewById(R.id.recyclerView);
         facilityButton = findViewById(R.id.facilityButton);
         streetSpinner = findViewById(R.id.streetSpinner);
