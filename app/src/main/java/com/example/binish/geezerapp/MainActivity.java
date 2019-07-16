@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         dataViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()).create(GetData.class);
         observingSearchParameters();
-        
+
         searchDropdown.setOnClickListener(this);
         searchBox.setOnEditorActionListener(this);
         orderByCardView.setOnClickListener(this);

@@ -1,9 +1,13 @@
 package com.example.binish.geezerapp.adapters;
 
 import android.content.Context;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +24,8 @@ import java.util.List;
 public class PropertyViewAdapter extends RecyclerView.Adapter<ViewHolder> {
     Context context;
     List<Property> properties;
+    String TAG = "scrollValues";
+    ViewGroup parent;
 
     public PropertyViewAdapter(Context context, List<Property> properties) {
         this.context = context;
@@ -29,7 +35,14 @@ public class PropertyViewAdapter extends RecyclerView.Adapter<ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        this.parent = parent;
         return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.design_properties, parent, false));
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
+        holder.detailsLayout.setVisibility(View.GONE);
+        super.onViewDetachedFromWindow(holder);
     }
 
     @Override
@@ -49,6 +62,21 @@ public class PropertyViewAdapter extends RecyclerView.Adapter<ViewHolder> {
         holder.year_built.setText("Year Built: " + String.valueOf(property.getYear_built()));
         holder.facilities.setText("Special: " + property.getSpecial());
 
+        holder.propertyCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (holder.detailsLayout.getVisibility() == View.GONE) {
+//                    TransitionManager.beginDelayedTransition(parent, new AutoTransition());
+                    holder.detailsLayout.setVisibility(View.VISIBLE);
+                } else {
+//                    TransitionManager.beginDelayedTransition(parent, new AutoTransition());
+                    holder.detailsLayout.setVisibility(View.GONE);
+                }
+
+            }
+        });
+
+
         if (property.getWishlisted())
             holder.wishList.setImageResource(R.drawable.ic_shopping_cart_dark_24dp);
         Glide.with(context)
@@ -61,6 +89,8 @@ public class PropertyViewAdapter extends RecyclerView.Adapter<ViewHolder> {
     public int getItemCount() {
         return properties.size();
     }
+
+
 }
 
 class ViewHolder extends RecyclerView.ViewHolder {
