@@ -1,5 +1,6 @@
 package com.example.binish.geezerapp;
 
+import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.content.DialogInterface;
@@ -48,7 +49,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     EditText searchBox;
     CardView orderByCardView;
     NumberPicker numberPicker;
+    PropertyViewAdapter propertyViewAdapter;
     String order_by = "price_asc";
+    int defaultOrderValue = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         searchBox = findViewById(R.id.searchBox);
         orderByCardView = findViewById(R.id.orderByCardView);
         recyclerView = findViewById(R.id.recyclerView);
+
 
         dataViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()).create(GetData.class);
         dataViewModel.getParameters().observe(this, new Observer<Parameters>() {
@@ -90,30 +94,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.orderByCardView:
-                View dialogView = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_order_by, null, false);
-                numberPicker = dialogView.findViewById(R.id.orderByPicker);
-                final String[] list = {"Price Ascending", "Price Descending", "Size Ascending", "Size Descending"};
-                numberPicker.setMinValue(0);
-                numberPicker.setMaxValue(list.length - 1);
-                numberPicker.setDisplayedValues(list);
-                AlertDialog.Builder box = new AlertDialog.Builder(MainActivity.this)
+                View dialogView = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_order_by, null);
+                AlertDialog.Builder box = new AlertDialog.Builder(this)
                         .setTitle("Order By:")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                order_by = list[numberPicker.getValue()];
-                            }
-                        })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                             }
                         });
-                if (view.getParent() != null) {
-                    ((ViewGroup) view.getParent()).removeView(view);
-                }
-                box.setView(view);
+                numberPicker = dialogView.findViewById(R.id.orderByPicker);
+                final String[] list = {"Price Ascending", "Price Descending", "Size Ascending", "Size Descending"};
+                numberPicker.setMinValue(0);
+                numberPicker.setMaxValue(list.length - 1);
+                numberPicker.setDisplayedValues(list);
+                numberPicker.setValue(defaultOrderValue);
+                box.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (list[numberPicker.getValue()]){
+                            case "Price Ascending":
+                                order_by = "price_asc";
+                                defaultOrderValue = 0;
+                                break;
+                            case "Price Descending":
+                                order_by = "price_desc";
+                                defaultOrderValue = 1;
+                                break;
+                            case "Size Descending":
+                                order_by = "size_desc";
+                                defaultOrderValue = 3;
+                                break;
+                            case "Size Ascending":
+                                order_by = "size_asc";
+                                defaultOrderValue = 2;
+                                break;
+                        }
+
+                        searchWork(false);
+                    }
+                });
+                box.setView(dialogView);
                 box.show();
                 break;
         }
@@ -123,32 +144,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
         if (i == EditorInfo.IME_ACTION_DONE) {
             if (!searchBox.getText().toString().equals("")) {
-                if (advanceSearchLayout.getVisibility() == View.GONE) {
-                    String keyword = searchBox.getText().toString();
-                    SearchBody searchBody = new SearchBody();
-                    searchBody.setKeyword(keyword);
-                    searchBody.setSkip(0);
-                    searchBody.setSort_by(order_by);
-                    dataViewModel.setProperty(searchBody);
-                    initRecyclerView();
-                }
+                searchWork(true);
             }
             return true;
         }
         return false;
     }
 
-    private void initRecyclerView() {
+    private void initRecyclerView(ArrayList<Property> properties) {
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        propertyViewAdapter = new PropertyViewAdapter(MainActivity.this, properties);
+        recyclerView.setAdapter(propertyViewAdapter);
 
-        dataViewModel.getProperty().observe(this, new Observer<Result>() {
-            @Override
-            public void onChanged(@Nullable Result result) {
-                recyclerView.setAdapter(new PropertyViewAdapter(MainActivity.this, result.getProperties()));
-            }
-        });
+    }
 
+    private void searchWork(final boolean enter) {
+        if (advanceSearchLayout.getVisibility() == View.GONE) {
+            String keyword = searchBox.getText().toString();
+            SearchBody searchBody = new SearchBody();
+            searchBody.setKeyword(keyword);
+            searchBody.setSkip(0);
+            searchBody.setSort_by(order_by);
+            dataViewModel.setProperty(searchBody);
+            dataViewModel.getProperty().observe(this, new Observer<Result>() {
+                @Override
+                public void onChanged(@Nullable Result result) {
+                    if(enter)
+                        initRecyclerView(result.getProperties());
+                    else
+                        propertyViewAdapter.notifyDataSetChanged();
+                    orderByCardView.setVisibility(View.VISIBLE);
+                }
+            });
+        }
     }
 
     private void populateSearch(Parameters parameters) {
