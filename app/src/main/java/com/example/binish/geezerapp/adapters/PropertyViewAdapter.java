@@ -66,10 +66,10 @@ public class PropertyViewAdapter extends RecyclerView.Adapter<ViewHolder> {
             @Override
             public void onClick(View view) {
                 if (holder.detailsLayout.getVisibility() == View.GONE) {
-//                    TransitionManager.beginDelayedTransition(parent, new AutoTransition());
+                    TransitionManager.beginDelayedTransition(parent, new AutoTransition().setDuration(100));
                     holder.detailsLayout.setVisibility(View.VISIBLE);
                 } else {
-//                    TransitionManager.beginDelayedTransition(parent, new AutoTransition());
+                    TransitionManager.beginDelayedTransition(parent, new AutoTransition().setDuration(100));
                     holder.detailsLayout.setVisibility(View.GONE);
                 }
 

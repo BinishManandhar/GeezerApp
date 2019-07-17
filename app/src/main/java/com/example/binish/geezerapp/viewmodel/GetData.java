@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
 import com.example.binish.geezerapp.models.AdvanceSearchBody;
+import com.example.binish.geezerapp.models.DefaultDisplay;
 import com.example.binish.geezerapp.models.Parameters;
 import com.example.binish.geezerapp.models.Property;
 import com.example.binish.geezerapp.models.Result;
@@ -39,5 +40,10 @@ public class GetData extends ViewModel {
     public void setPropertyAdvance(AdvanceSearchBody advanceSearchBody){
         GetProperty getProperty = GetProperty.getInstance();
         result = getProperty.getAdvanceParameters(advanceSearchBody);
+    }
+
+    public void setPropertyAll(DefaultDisplay defaultDisplay){
+        GetProperty getProperty = GetProperty.getInstance();
+        result = getProperty.getAll(defaultDisplay);
     }
 }

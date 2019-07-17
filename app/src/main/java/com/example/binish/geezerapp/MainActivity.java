@@ -30,12 +30,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.binish.geezerapp.adapters.PropertyViewAdapter;
 import com.example.binish.geezerapp.models.AdvanceSearchBody;
+import com.example.binish.geezerapp.models.DefaultDisplay;
 import com.example.binish.geezerapp.models.Parameters;
 import com.example.binish.geezerapp.models.PriceRange;
 import com.example.binish.geezerapp.models.Property;
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     NumberPicker numberPicker;
     Spinner streetSpinner, priceRangeSpinner, bedroomSpinner, bathroomSpinner, typeSpinner, furnishingSpinner;
     Spinner transportSpinner;
+    ProgressBar progressBar;
     Button facilityButton;
     Animation slide;
 
@@ -81,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         slide = AnimationUtils.loadAnimation(this,R.anim.slide);
 
         dataViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()).create(GetData.class);
+        instantiateData();
         observingSearchParameters();
 
         searchDropdown.setOnClickListener(this);
@@ -90,16 +94,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void instantiateData(){
+        DefaultDisplay defaultDisplay = new DefaultDisplay();
+        defaultDisplay.setSort_by(order_by);
+        defaultDisplay.setResult_size(10);
+        dataViewModel.setPropertyAll(defaultDisplay);
+        observingProperties(true);
+    }
+
     @Override
     public void onClick(final View view) {
         switch (view.getId()) {
             case R.id.searchDropdown:
                 if (advanceSearchLayout.getVisibility() == View.VISIBLE) {
-                    TransitionManager.beginDelayedTransition(mainContraintLayout,new AutoTransition().setDuration(500));
+                    TransitionManager.beginDelayedTransition(mainContraintLayout,new AutoTransition().setDuration(300));
                     advanceSearchLayout.setVisibility(View.GONE);
                     searchDropdown.setImageResource(R.drawable.ic_arrow_drop_down_black_24dp);
                 } else {
-                    TransitionManager.beginDelayedTransition(mainContraintLayout,new AutoTransition().setDuration(500));
+                    TransitionManager.beginDelayedTransition(mainContraintLayout,new AutoTransition().setDuration(300));
                     advanceSearchLayout.setVisibility(View.VISIBLE);
                     searchDropdown.setImageResource(R.drawable.ic_arrow_drop_up_black_24dp);
                 }
@@ -268,6 +280,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 else
                     propertyViewAdapter.notifyDataSetChanged();
                 orderByCardView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -345,6 +358,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         typeSpinner = findViewById(R.id.typeSpinner);
         furnishingSpinner = findViewById(R.id.furnishingSpinner);
         transportSpinner = findViewById(R.id.transportSpinner);
+        progressBar = findViewById(R.id.progressBar);
     }
 
 }
