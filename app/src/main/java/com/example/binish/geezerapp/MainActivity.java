@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String TAG = "ParameterRetrofit";
     GetData dataViewModel;
     RecyclerView recyclerView;
-    LinearLayout advanceSearchLayout,searchLinearLayout;
+    LinearLayout advanceSearchLayout, searchLinearLayout;
     ConstraintLayout mainContraintLayout;
     ImageView searchDropdown;
     CardView searchCardView;
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         initializeViews();
         parameters = new Parameters();
-        slide = AnimationUtils.loadAnimation(this,R.anim.slide);
+        slide = AnimationUtils.loadAnimation(this, R.anim.slide);
 
         dataViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()).create(GetData.class);
         instantiateData();
@@ -94,24 +94,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void instantiateData(){
-        DefaultDisplay defaultDisplay = new DefaultDisplay();
-        defaultDisplay.setSort_by(order_by);
-        defaultDisplay.setResult_size(10);
-        dataViewModel.setPropertyAll(defaultDisplay);
-        observingProperties(true);
-    }
+
 
     @Override
     public void onClick(final View view) {
         switch (view.getId()) {
             case R.id.searchDropdown:
                 if (advanceSearchLayout.getVisibility() == View.VISIBLE) {
-                    TransitionManager.beginDelayedTransition(mainContraintLayout,new AutoTransition().setDuration(300));
+                    TransitionManager.beginDelayedTransition(mainContraintLayout, new AutoTransition().setDuration(300));
                     advanceSearchLayout.setVisibility(View.GONE);
                     searchDropdown.setImageResource(R.drawable.ic_arrow_drop_down_black_24dp);
                 } else {
-                    TransitionManager.beginDelayedTransition(mainContraintLayout,new AutoTransition().setDuration(300));
+                    TransitionManager.beginDelayedTransition(mainContraintLayout, new AutoTransition().setDuration(300));
                     advanceSearchLayout.setVisibility(View.VISIBLE);
                     searchDropdown.setImageResource(R.drawable.ic_arrow_drop_up_black_24dp);
                 }
@@ -155,8 +149,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 break;
                         }
 
-                        if(searchBox.getText().toString().equals(""))
-                            searchWork(false);
+                        if (!searchBox.getText().toString().equals(""))
+                            searchWork();
                         else
                             instantiateData();
                     }
@@ -218,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
         if (i == EditorInfo.IME_ACTION_DONE) {
             if (!searchBox.getText().toString().equals("")) {
-                searchWork(true);
+                searchWork();
 
             } else
                 Toast.makeText(MainActivity.this, "Search field cannot be empty", Toast.LENGTH_SHORT).show();
@@ -235,7 +229,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void searchWork(final boolean enter) {
+    private void instantiateData() {
+        DefaultDisplay defaultDisplay = new DefaultDisplay();
+        defaultDisplay.setSort_by(order_by);
+        defaultDisplay.setResult_size(10);
+        dataViewModel.setPropertyAll(defaultDisplay);
+        observingProperties();
+    }
+
+    private void searchWork() {
         if (advanceSearchLayout.getVisibility() == View.GONE) {
             String keyword = searchBox.getText().toString();
             SearchBody searchBody = new SearchBody();
@@ -243,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             searchBody.setSkip(0);
             searchBody.setSort_by(order_by);
             dataViewModel.setProperty(searchBody);
-            observingProperties(enter);
+            observingProperties();
         } else if (!facilityButton.getText().toString().equals("Select")) {
             advanceSearchLayout.setVisibility(View.GONE);
             ArrayList<String> num_bedrooms = new ArrayList<>();
@@ -268,27 +270,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             advanceSearchBody.setFacilities(facilityList);
             advanceSearchBody.setTransport(transportSpinner.getSelectedItem().toString());
             dataViewModel.setPropertyAdvance(advanceSearchBody);
-            observingProperties(enter);
+            observingProperties();
         } else {
             Toast.makeText(MainActivity.this, "Please select atleast one facility", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void observingProperties(final Boolean enter) {
+    private void observingProperties() {
         dataViewModel.getProperty().observe(this, new Observer<Result>() {
             @Override
             public void onChanged(@Nullable Result result) {
-                if (enter)
+                if (result != null) {
                     initRecyclerView(result.getProperties());
-                else
-                    propertyViewAdapter.notifyDataSetChanged();
+                }
+                propertyViewAdapter.notifyDataSetChanged();
                 orderByCardView.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
             }
         });
     }
 
-    private void observingSearchParameters(){
+    private void observingSearchParameters() {
         dataViewModel.getParameters().observe(this, new Observer<Parameters>() {
             @Override
             public void onChanged(@Nullable Parameters parameters) {

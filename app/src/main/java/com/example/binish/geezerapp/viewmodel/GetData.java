@@ -20,9 +20,12 @@ public class GetData extends ViewModel {
     String TAG = "ParameterRetrofit";
     private MutableLiveData<Parameters> parameters;
     private MutableLiveData<Result> result;
+    GetProperty getProperty;
     public GetData(){
         GetSearchParameters getSearchParameters = GetSearchParameters.getInstance();
         parameters = getSearchParameters.getParameters();
+
+        getProperty = GetProperty.getInstance();
     }
 
     public LiveData<Parameters> getParameters(){
@@ -30,7 +33,6 @@ public class GetData extends ViewModel {
     }
 
     public void setProperty(SearchBody searchBody){
-        GetProperty getProperty = GetProperty.getInstance();
         result = getProperty.getParameters(searchBody);
     }
     public LiveData<Result> getProperty(){
@@ -38,12 +40,10 @@ public class GetData extends ViewModel {
     }
 
     public void setPropertyAdvance(AdvanceSearchBody advanceSearchBody){
-        GetProperty getProperty = GetProperty.getInstance();
         result = getProperty.getAdvanceParameters(advanceSearchBody);
     }
 
     public void setPropertyAll(DefaultDisplay defaultDisplay){
-        GetProperty getProperty = GetProperty.getInstance();
         result = getProperty.getAll(defaultDisplay);
     }
 }
