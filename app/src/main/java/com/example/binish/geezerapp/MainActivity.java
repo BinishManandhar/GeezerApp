@@ -155,7 +155,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 break;
                         }
 
-                        searchWork(false);
+                        if(searchBox.getText().toString().equals(""))
+                            searchWork(false);
+                        else
+                            instantiateData();
                     }
                 });
                 box.setView(dialogView);
